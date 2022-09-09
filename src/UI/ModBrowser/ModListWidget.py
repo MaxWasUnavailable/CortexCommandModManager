@@ -56,7 +56,7 @@ class ModListWidget(QtWidgets.QListWidget):
 
     def add_item(self, mod: Mod) -> None:
         """
-        Adds an item to the list, and then sets that item to display the given ModEntry widget.
+        Adds an item to the list, and then sets that item to display the given ModListItem widget.
         :param mod: The mod to list.
         """
         item = QtWidgets.QListWidgetItem()

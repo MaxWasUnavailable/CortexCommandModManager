@@ -6,9 +6,9 @@ from src.utils.logger import get_logger
 
 class ModBrowserView(QtWidgets.QWidget):
     """
-    A 2D graphics view widget for displaying a Solar System.
-    Has pannable and zoomable functionality.
-    Has refresh functionality to redraw the map based on all space objects.
+    Mod Browser view widget.
+
+    Holds all widgets related to the mod browser.
     """
 
     def __init__(self, parent=None, mod_manager: ModManager = None):
