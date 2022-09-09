@@ -21,6 +21,7 @@ class ModManager:
 
         self.client: Client = None
         self.game: Game = None
+        self.cached_mods = []
 
         self.init_client()
 
@@ -52,6 +53,8 @@ class ModManager:
         self.logger.debug(f"Found {len(mods)} mods")
 
         mods = self.filter_mods(mods, tag_filters, name_filter)
+
+        self.cached_mods = mods
 
         return mods
 
