@@ -32,20 +32,26 @@ class Config(dict):
                 yaml.dump(self, f)
 
     @classmethod
-    def from_file(cls, config_file: str = None):
+    def from_file(cls, config_file: str = None, default_first: bool = True):
         """
         Create a new instance of Config from a config file.
         """
-        config = cls()
+        if default_first:
+            config = cls.default()
+        else:
+            config = cls()
         config.read_config(config_file)
         return config
 
     @classmethod
-    def from_dict(cls, config_dict: dict = None):
+    def from_dict(cls, config_dict: dict = None, default_first: bool = True):
         """
         Create a new instance of Config from a dictionary.
         """
-        config = cls()
+        if default_first:
+            config = cls.default()
+        else:
+            config = cls()
         config.update(config_dict)
         return config
 
@@ -61,5 +67,12 @@ class Config(dict):
                     "game_id": 508
                 },
                 "mods_directory": "./mods"
-            }
+            },
+            default_first=False
         )
+
+
+if __name__ == '__main__':
+    test = Config.default()
+
+    print(test)
