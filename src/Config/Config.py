@@ -63,7 +63,7 @@ class Config(dict):
         return Config.from_dict(
             {
                 "modio": {
-                    "api_key": "",
+                    "api_key": "ab779d10d97eadfb36b43c27ec6292a3",
                     "game_id": 508
                 },
                 "mods_directory": "./mods"
