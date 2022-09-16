@@ -4,6 +4,7 @@ from src.Config.Config import Config
 from modio import Client
 from modio.game import Game, Mod
 from zipfile import ZipFile
+from typing import List
 import requests
 import json
 import os
@@ -21,7 +22,9 @@ class ModManager:
 
         self.client: Client = None
         self.game: Game = None
-        self.cached_mods = []
+
+        self.cached_mods: List[Mod] = []
+        self.cached_installed_mods: List[InstalledMod] = []
 
         self.init_client()
 
@@ -140,7 +143,11 @@ class ModManager:
         self.logger.debug(f"Found {len(mod_dirs)} installed mods")
 
         mods = []
-        mod_io_mods = self.get_mods()
+
+        mod_io_mods = self.cached_mods
+        if mod_io_mods is None:
+            mod_io_mods = self.get_mods()
+
         for mod_dir in mod_dirs:
             index_ini_path = os.path.join(self.config["mods_directory"], mod_dir, "index.ini")
             if not os.path.exists(index_ini_path):
@@ -164,6 +171,8 @@ class ModManager:
                 self.logger.debug(f"Found matching mod.io mod: {mod_io_mod.name}")
 
             mods.append(mod)
+
+        self.cached_installed_mods = mods
 
         self.logger.debug(f"Found {len(mods)} valid installed mods")
         return mods
