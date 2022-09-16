@@ -26,8 +26,34 @@ class ModBrowserView(QtWidgets.QWidget):
         self.mod_list = None
         self.refresh_button = None
 
+        self.finished_loading = False
+
         self.setup_ui()
         self.logger.info("Mod browser view setup complete.")
+
+    def finish_loading(self):
+        """
+        Finishes loading the mod browser.
+        Called by the list widget when it has finished loading.
+        """
+        self.finished_loading = True
+
+    def set_button_enabled(self, enabled: bool):
+        """
+        Sets the refresh button to enabled or disabled.
+        :param enabled: Whether the button should be enabled.
+        """
+        self.refresh_button.setEnabled(enabled)
+
+    def set_button_loading(self, loading: bool):
+        """
+        Sets the refresh button to loading or not loading.
+        :param loading: Whether the button should be loading.
+        """
+        if loading:
+            self.refresh_button.setText("Loading...")
+        else:
+            self.refresh_button.setText("Refresh")
 
     def setup_ui(self):
         """
