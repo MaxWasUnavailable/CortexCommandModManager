@@ -1,10 +1,10 @@
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from src.ModManager.ModManager import ModManager
 from UI.utils.GenericThread import GenericThread
 from src.UI.ModBrowser.ModListItem import ModListItem
+from src.UI.ModBrowser.IconFetchTask import IconFetchTask
 from src.utils.logger import get_logger
 from modio.mod import Mod
-import requests
 import time
 
 
@@ -20,9 +20,11 @@ class ModListWidget(QtWidgets.QListWidget):
         self.mod_manager = mod_manager
         self.mods = []
         self.refresher_thread = GenericThread(self, self.refresh_start)
+
         self.refresher_thread.finished.connect(self.refresh_end)
 
-        self.icons_enabled = False
+        self.icons_enabled = True
+
         self.refreshing_list = False
 
         self.setup_ui()
@@ -58,13 +60,11 @@ class ModListWidget(QtWidgets.QListWidget):
         """
         self.mods = self.mod_manager.get_mods()
 
-        # Workaround for loading of icons blocking the UI thread if handled during list population.
-        # Might need to be threaded in the future to speed things up.
         if self.icons_enabled:
             for mod in self.mods:
-                start_time = time.time()
-                mod.icon_data = requests.get(mod.logo.small).content
-                self.logger.debug(f"Icon for mod {mod.name} loaded in {time.time() - start_time} seconds.")
+                QtCore.QThreadPool.globalInstance().start(IconFetchTask(mod))
+
+            QtCore.QThreadPool.globalInstance().waitForDone()
 
     def apply_filters(self, search: str = None, tags: list = None):
         """
