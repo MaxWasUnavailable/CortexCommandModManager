@@ -19,8 +19,8 @@ class ModListWidget(QtWidgets.QListWidget):
 
         self.mod_manager = mod_manager
         self.mods = []
-        self.refresher_thread = GenericThread(self, self.refresh_mods)
-        self.refresher_thread.finished.connect(self.refresh_list)
+        self.refresher_thread = GenericThread(self, self.refresh_start)
+        self.refresher_thread.finished.connect(self.refresh_end)
 
         self.setup_ui()
         self.logger.info("Mod list widget setup complete.")
@@ -32,6 +32,22 @@ class ModListWidget(QtWidgets.QListWidget):
         self.setSortingEnabled(True)
 
         self.refresher_thread.start()
+
+    def refresh_start(self):
+        """
+        Called when the list refresh has started.
+        """
+        self.parent().set_button_enabled(False)
+        self.parent().set_button_loading(True)
+        self.refresh_mods()
+
+    def refresh_end(self):
+        """
+        Called when the list refresh has ended.
+        """
+        self.parent().set_button_enabled(True)
+        self.parent().set_button_loading(False)
+        self.refresh_list()
 
     def refresh_mods(self):
         """
