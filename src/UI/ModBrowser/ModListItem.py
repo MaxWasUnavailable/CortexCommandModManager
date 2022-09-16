@@ -24,14 +24,16 @@ class ModListItem(QtWidgets.QWidget):
         """
         Sets up the UI.
         """
-        icon_data = self.mod.icon_data
-        icon_pixmap = QtGui.QPixmap()
-        icon_pixmap.loadFromData(icon_data)
+        # If self.mod has icon_data
+        if hasattr(self.mod, "icon_data"):
+            icon_data = self.mod.icon_data
+            icon_pixmap = QtGui.QPixmap()
+            icon_pixmap.loadFromData(icon_data)
 
-        self.mod_icon = QtWidgets.QLabel()
-        self.mod_icon.setPixmap(icon_pixmap)
-        self.mod_icon.setScaledContents(True)
-        self.mod_icon.setFixedSize(48, 32)
+            self.mod_icon = QtWidgets.QLabel()
+            self.mod_icon.setPixmap(icon_pixmap)
+            self.mod_icon.setScaledContents(True)
+            self.mod_icon.setFixedSize(48, 32)
 
         self.mod_name_label = QtWidgets.QLabel(self.mod.name)
         font = self.mod_name_label.font()
@@ -44,7 +46,8 @@ class ModListItem(QtWidgets.QWidget):
         self.mod_tags_label.setFont(font)
 
         self.layout = QtWidgets.QHBoxLayout()
-        self.layout.addWidget(self.mod_icon)
+        if self.mod_icon is not None:
+            self.layout.addWidget(self.mod_icon)
         self.layout.addWidget(self.mod_name_label)
         self.layout.addWidget(self.mod_tags_label)
         self.setLayout(self.layout)

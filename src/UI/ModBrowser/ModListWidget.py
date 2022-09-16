@@ -22,6 +22,8 @@ class ModListWidget(QtWidgets.QListWidget):
         self.refresher_thread = GenericThread(self, self.refresh_start)
         self.refresher_thread.finished.connect(self.refresh_end)
 
+        self.icons_enabled = False
+
         self.setup_ui()
         self.logger.info("Mod list widget setup complete.")
 
@@ -53,14 +55,15 @@ class ModListWidget(QtWidgets.QListWidget):
         """
         Refreshes the cached mod list.
         """
-        # TODO: Remove the slice
-        self.mods = self.mod_manager.get_mods()[10:20]
+        self.mods = self.mod_manager.get_mods()
 
         # Workaround for loading of icons blocking the UI thread if handled during list population.
-        for mod in self.mods:
-            start_time = time.time()
-            mod.icon_data = requests.get(mod.logo.small).content
-            self.logger.debug(f"Icon for mod {mod.name} loaded in {time.time() - start_time} seconds.")
+        # Might need to be threaded in the future to speed things up.
+        if self.icons_enabled:
+            for mod in self.mods:
+                start_time = time.time()
+                mod.icon_data = requests.get(mod.logo.small).content
+                self.logger.debug(f"Icon for mod {mod.name} loaded in {time.time() - start_time} seconds.")
 
     def refresh_list(self):
         """
