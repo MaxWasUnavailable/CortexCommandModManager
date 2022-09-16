@@ -58,7 +58,10 @@ class ModManager:
 
         return mods
 
-    def filter_mods(self, mods: list, tag_filters: list = None, name_filter: str = None):
+    def filter_mods(self, mods: list = None, tag_filters: list = None, name_filter: str = None):
+        if mods is None:
+            mods = self.cached_mods
+
         if tag_filters is not None:
             mods = [mod for mod in mods if all(tag in self.mod_tags(mod) for tag in tag_filters)]
             self.logger.debug(f"Filtered by tags {tag_filters} to {len(mods)} mods")
