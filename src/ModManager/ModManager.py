@@ -59,11 +59,19 @@ class ModManager:
         return mods
 
     def filter_mods(self, mods: list = None, tag_filters: list = None, name_filter: str = None):
+        """
+        Filter mods by tags and name.
+        :param mods: The mods to filter.
+        :param tag_filters: The tags to filter by.
+        :param name_filter: The name to filter by.
+        :return: The filtered mods.
+        """
         if mods is None:
             mods = self.cached_mods
 
+        # TODO: Match tags partially
         if tag_filters is not None:
-            mods = [mod for mod in mods if all(tag in self.mod_tags(mod) for tag in tag_filters)]
+            mods = [mod for mod in mods if all(tag.lower() in self.mod_tags(mod, lower=True) for tag in tag_filters)]
             self.logger.debug(f"Filtered by tags {tag_filters} to {len(mods)} mods")
 
         if name_filter is not None:
@@ -161,8 +169,11 @@ class ModManager:
         return mods
 
     @staticmethod
-    def mod_tags(mod: Mod):
+    def mod_tags(mod: Mod, lower: bool = False):
         """
         Get a list of tags for a mod.
         """
-        return [tag for tag in mod.tags]
+        tags = [tag for tag in mod.tags]
+        if lower:
+            tags = [tag.lower() for tag in tags]
+        return tags

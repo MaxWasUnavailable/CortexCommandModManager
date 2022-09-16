@@ -23,6 +23,7 @@ class ModListWidget(QtWidgets.QListWidget):
         self.refresher_thread.finished.connect(self.refresh_end)
 
         self.icons_enabled = False
+        self.refreshing_list = False
 
         self.setup_ui()
         self.logger.info("Mod list widget setup complete.")
@@ -65,13 +66,28 @@ class ModListWidget(QtWidgets.QListWidget):
                 mod.icon_data = requests.get(mod.logo.small).content
                 self.logger.debug(f"Icon for mod {mod.name} loaded in {time.time() - start_time} seconds.")
 
+    def apply_filters(self, search: str = None, tags: list = None):
+        """
+        Applies a search to the list.
+        :param search: The search to apply.
+        :param tags: The tags to apply.
+        """
+        self.mods = self.mod_manager.filter_mods(name_filter=search, tag_filters=tags)
+
     def refresh_list(self):
         """
         Refreshes the list.
         """
+        if self.refreshing_list:
+            self.logger.debug("List refresh already in progress, skipping.")
+            return
+        self.refreshing_list = True
+
         self.clear()
         for mod in self.mods:
             self.add_item(mod)
+
+        self.refreshing_list = False
 
     def add_item(self, mod: Mod) -> None:
         """

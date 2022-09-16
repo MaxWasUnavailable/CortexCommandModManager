@@ -1,5 +1,6 @@
 from PySide6 import QtWidgets
 from src.ModManager.ModManager import ModManager
+from UI.utils.GenericThread import GenericThread
 from UI.ModBrowser.ModListWidget import ModListWidget
 from src.utils.logger import get_logger
 
@@ -21,22 +22,16 @@ class ModBrowserView(QtWidgets.QWidget):
         self.mod_view = None
         self.mod_list_container = None
         self.layout = None
-        self.search_bar = None
-        self.tags_bar = None
-        self.mod_list = None
-        self.refresh_button = None
+        self.search_bar: QtWidgets.QLineEdit = None
+        self.tags_bar: QtWidgets.QLineEdit = None
+        self.mod_list: ModListWidget = None
+        self.refresh_button: QtWidgets.QPushButton = None
 
-        self.finished_loading = False
+        self.filter_thread = GenericThread(self, self.apply_filters)
 
         self.setup_ui()
-        self.logger.info("Mod browser view setup complete.")
 
-    def finish_loading(self):
-        """
-        Finishes loading the mod browser.
-        Called by the list widget when it has finished loading.
-        """
-        self.finished_loading = True
+        self.logger.info("Mod browser view setup complete.")
 
     def set_button_enabled(self, enabled: bool):
         """
@@ -54,6 +49,25 @@ class ModBrowserView(QtWidgets.QWidget):
             self.refresh_button.setText("Loading...")
         else:
             self.refresh_button.setText("Refresh")
+
+    def apply_filters(self):
+        """
+        Applies the filters to the mod list.
+        """
+        search_term = self.search_bar.text()
+        tags = self.tags_bar.text()
+
+        if search_term == "":
+            search_term = None
+        else:
+            search_term = search_term.lower()
+
+        if tags == "":
+            tags = None
+        else:
+            tags = tags.lower().split(",")
+
+        self.mod_list.apply_filters(search_term, tags)
 
     def setup_ui(self):
         """
@@ -77,3 +91,7 @@ class ModBrowserView(QtWidgets.QWidget):
         self.layout.addWidget(self.refresh_button)
 
         self.refresh_button.clicked.connect(self.mod_list.refresher_thread.start)
+        self.search_bar.textChanged.connect(self.filter_thread.start)
+        self.tags_bar.textChanged.connect(self.filter_thread.start)
+
+        self.filter_thread.finished.connect(self.mod_list.refresh_list)
