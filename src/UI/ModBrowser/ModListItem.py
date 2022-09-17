@@ -28,6 +28,37 @@ class ModListItemStats(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 
+class ModListItemNameTags(QtWidgets.QWidget):
+    """
+    Simple widget with a vertical layout that displays the name in bold and tags in italic.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+
+        self.mod_name_label = QtWidgets.QLabel(self.parent().mod.name)
+        self.mod_name_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.mod_name_label.setFont(QtGui.QFont("", 12, QtGui.QFont.Bold))  # TODO: Decide on a font
+        self.mod_name_label.setFixedWidth(350)
+
+        self.mod_tags_label = QtWidgets.QLabel(", ".join(self.parent().mod.tags))
+        self.mod_tags_label.setWordWrap(True)
+        self.mod_tags_label.setAlignment(QtCore.Qt.AlignLeft)
+        self.mod_tags_label.setFixedWidth(320)
+        tags_font = self.mod_tags_label.font()
+        tags_font.setItalic(True)
+        self.mod_tags_label.setFont(tags_font)
+
+        self.layout.addWidget(self.mod_name_label)
+        self.layout.addWidget(self.mod_tags_label)
+
+        self.setFixedWidth(350)
+
+        self.setLayout(self.layout)
+
+
 class ModListItem(QtWidgets.QFrame):
     """
     A QWidget which represents a mod.
@@ -38,10 +69,8 @@ class ModListItem(QtWidgets.QFrame):
         self.mod: Mod = mod
 
         self.mod_icon = None
-        self.mod_name_label = None
+        self.mod_name_tag_widget = None
         self.mod_summary_label = None
-        self.mod_tags_label = None
-
         self.mod_stats_widget = None
         self.mod_last_updated_label = None
 
@@ -101,23 +130,11 @@ class ModListItem(QtWidgets.QFrame):
             self.mod_icon.setMaximumHeight(64)
             self.mod_icon.setPixmap(self.mod_icon.pixmap().scaled(64, 64, QtCore.Qt.KeepAspectRatio))
 
-        self.mod_name_label = QtWidgets.QLabel(self.mod.name)
-        self.mod_name_label.setWordWrap(True)
-        self.mod_name_label.setFixedWidth(200)
-        font = self.mod_name_label.font()
-        font.setBold(True)
-        self.mod_name_label.setFont(font)
+        self.mod_name_tag_widget = ModListItemNameTags(self)
 
         self.mod_summary_label = QtWidgets.QLabel(self.mod.summary)
         self.mod_summary_label.setWordWrap(True)
         self.mod_summary_label.setFixedWidth(320)
-
-        self.mod_tags_label = QtWidgets.QLabel(", ".join(self.mod.tags))
-        self.mod_tags_label.setWordWrap(True)
-        self.mod_tags_label.setFixedWidth(400)
-        font = self.mod_tags_label.font()
-        font.setItalic(True)
-        self.mod_tags_label.setFont(font)
 
         self.mod_stats_widget = ModListItemStats(self)
 
@@ -126,9 +143,8 @@ class ModListItem(QtWidgets.QFrame):
         self.layout = QtWidgets.QHBoxLayout()
         if self.mod_icon is not None:
             self.layout.addWidget(self.mod_icon)
-        self.layout.addWidget(self.mod_name_label)
+        self.layout.addWidget(self.mod_name_tag_widget)
         self.layout.addWidget(self.mod_summary_label)
-        self.layout.addWidget(self.mod_tags_label)
         self.layout.addWidget(self.mod_stats_widget)
         self.layout.addWidget(self.mod_last_updated_label)
 
