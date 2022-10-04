@@ -5,7 +5,17 @@ from src.UI.ModBrowser.ModListItem import ModListItem
 from src.UI.ModBrowser.IconFetchTask import IconFetchTask
 from src.utils.logger import get_logger
 from modio.mod import Mod
-import time
+from enum import Enum
+
+
+class SortingMode(Enum):
+    """
+    An enum which represents the sorting mode of the mod list.
+    """
+    NAME = 0
+    DOWNLOADS = 1
+    LIKES = 2
+    LAST_UPDATED = 3
 
 
 class ModListWidget(QtWidgets.QListWidget):
@@ -24,6 +34,9 @@ class ModListWidget(QtWidgets.QListWidget):
         self.refresher_thread.finished.connect(self.refresh_end)
 
         self.icons_enabled = True
+
+        self.sorting_behavior = SortingMode.NAME
+        self.sorting_reverse = False
 
         self.refreshing_list = False
 
@@ -74,6 +87,32 @@ class ModListWidget(QtWidgets.QListWidget):
         """
         self.mods = self.mod_manager.filter_mods(name_filter=search, tag_filters=tags)
 
+    def sort(self) -> None:
+        """
+        Sort mods based on the sorting mode.
+        :return: None
+        """
+        def sort_by_name(mod: Mod):
+            return mod.name
+
+        def sort_by_downloads(mod: Mod):
+            return mod.stats.downloads
+
+        def sort_by_likes(mod: Mod):
+            return mod.stats.positive
+
+        def sort_by_last_updated(mod: Mod):
+            return mod.updated
+
+        sorters = {
+            SortingMode.NAME: sort_by_name,
+            SortingMode.DOWNLOADS: sort_by_downloads,
+            SortingMode.LIKES: sort_by_likes,
+            SortingMode.LAST_UPDATED: sort_by_last_updated
+        }
+
+        self.mods.sort(key=sorters[self.sorting_behavior], reverse=self.sorting_reverse)
+
     def refresh_list(self):
         """
         Refreshes the list.
@@ -84,6 +123,9 @@ class ModListWidget(QtWidgets.QListWidget):
         self.refreshing_list = True
 
         self.clear()
+
+        self.sort()
+
         for mod in self.mods:
             self.add_item(mod)
 
