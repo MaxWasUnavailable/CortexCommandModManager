@@ -138,14 +138,14 @@ class ModBrowserView(QtWidgets.QWidget):
         Applies the sorting to the mod list.
         """
         sort_by = self.search_widget.sort_by.currentText()
-        sort_order = self.search_widget.sort_order.currentText()
+        sort_reverse = self.search_widget.sort_order.currentText()
 
-        if sort_order == "Ascending":
-            sort_order = True
+        if sort_reverse == "Ascending":
+            sort_reverse = True
         else:
-            sort_order = False
+            sort_reverse = False
 
-        self.mod_list.apply_sorting(SortingMode.from_name(sort_by), sort_order)
+        self.mod_list.apply_sorting(SortingMode.from_name(sort_by), sort_reverse)
 
     def setup_ui(self):
         """

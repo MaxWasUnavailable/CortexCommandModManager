@@ -52,7 +52,7 @@ class ModListWidget(QtWidgets.QListWidget):
         self.icons_enabled = True
 
         self.sorting_behavior = SortingMode.NAME
-        self.sorting_reverse = False
+        self.sorting_reverse = True
 
         self.refreshing_list = False
 
