@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore
 from src.ModManager.ModManager import ModManager
 from UI.utils.GenericThread import GenericThread
 from src.UI.ModBrowser.ModListItem import ModListItem
-from src.UI.ModBrowser.IconFetchTask import IconFetchTask
+from UI.ModBrowser.Tasks.IconFetchTask import IconFetchTask
 from src.utils.logger import get_logger
 from modio.mod import Mod
 from enum import Enum
@@ -16,6 +16,22 @@ class SortingMode(Enum):
     DOWNLOADS = 1
     LIKES = 2
     LAST_UPDATED = 3
+
+    @classmethod
+    def from_name(cls, name: str):
+        """
+        Get the sorting mode from the name.
+        """
+        if name == "NAME":
+            return SortingMode.NAME
+        elif name == "DOWNLOADS":
+            return SortingMode.DOWNLOADS
+        elif name == "LIKES":
+            return SortingMode.LIKES
+        elif name == "LAST_UPDATED":
+            return SortingMode.LAST_UPDATED
+        else:
+            return None
 
 
 class ModListWidget(QtWidgets.QListWidget):
@@ -86,6 +102,16 @@ class ModListWidget(QtWidgets.QListWidget):
         :param tags: The tags to apply.
         """
         self.mods = self.mod_manager.filter_mods(name_filter=search, tag_filters=tags)
+
+    def apply_sorting(self, mode: SortingMode, reverse: bool = False) -> None:
+        """
+        Applies a sorting mode to the list.
+        :param mode: The sorting mode to apply.
+        :param reverse: Whether to reverse the sorting.
+        """
+        self.sorting_behavior = mode
+        self.sorting_reverse = reverse
+        self.refresh_list()
 
     def sort(self) -> None:
         """
