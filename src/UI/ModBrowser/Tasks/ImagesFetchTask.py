@@ -16,6 +16,10 @@ class ImagesFetchTask(QRunnable):
         """
         Runs the task.
         """
+        if hasattr(self.mod, "images_data"):
+            return
+
         self.mod.images_data = []
         for image in self.mod.media.images:
             self.mod.images_data.append(requests.get(image.original).content)
+            break

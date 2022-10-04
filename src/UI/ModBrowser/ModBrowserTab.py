@@ -2,6 +2,7 @@ from PySide6 import QtWidgets
 from src.ModManager.ModManager import ModManager
 from UI.utils.GenericThread import GenericThread
 from UI.ModBrowser.ModListWidget import ModListWidget, SortingMode
+from UI.ModBrowser.ModDetailsWidget import ModDetailsWidget
 from src.utils.logger import get_logger
 
 
@@ -84,12 +85,13 @@ class ModBrowserView(QtWidgets.QWidget):
 
         self.mod_manager = mod_manager
 
-        self.mod_view = None
-        self.mod_list_container = None
         self.layout = None
+        self.container_layout = None
+        self.container_widget = None
         self.search_widget: ModBrowserSearch = None
         self.mod_list: ModListWidget = None
         self.refresh_button: QtWidgets.QPushButton = None
+        self.details_widget: ModDetailsWidget = None
 
         self.filter_thread = GenericThread(self, self.apply_filters)
 
@@ -157,11 +159,20 @@ class ModBrowserView(QtWidgets.QWidget):
         self.search_widget = ModBrowserSearch(self, self.mod_manager)
         self.layout.addWidget(self.search_widget)
 
-        self.mod_list = ModListWidget(self, self.mod_manager)
-        self.layout.addWidget(self.mod_list)
+        self.container_layout = QtWidgets.QHBoxLayout()
+
+        self.container_widget = QtWidgets.QWidget(self)
+        self.container_widget.setLayout(self.container_layout)
+        self.layout.addWidget(self.container_widget)
 
         self.refresh_button = QtWidgets.QPushButton("Refresh")
         self.layout.addWidget(self.refresh_button)
+
+        self.mod_list = ModListWidget(self.container_widget, self.mod_manager)
+        self.container_layout.addWidget(self.mod_list)
+
+        self.details_widget = ModDetailsWidget(self.container_widget, self.mod_manager)
+        self.container_layout.addWidget(self.details_widget)
 
         self.refresh_button.clicked.connect(self.mod_list.refresher_thread.start)
         self.search_widget.search_bar.textChanged.connect(self.filter_thread.start)
@@ -170,3 +181,18 @@ class ModBrowserView(QtWidgets.QWidget):
         self.search_widget.sort_order.currentTextChanged.connect(self.apply_sorting)
 
         self.filter_thread.finished.connect(self.mod_list.refresh_list)
+
+        self.close_details()
+
+    def open_details(self):
+        """
+        Opens the details of the selected mod.
+        """
+        self.details_widget.set_mod(self.mod_list.selected_item.mod)
+        self.details_widget.show()
+
+    def close_details(self):
+        """
+        Closes the details of the selected mod.
+        """
+        self.details_widget.hide()

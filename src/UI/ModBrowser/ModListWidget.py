@@ -45,9 +45,11 @@ class ModListWidget(QtWidgets.QListWidget):
 
         self.mod_manager = mod_manager
         self.mods = []
+        self.selected_item = None
         self.refresher_thread = GenericThread(self, self.refresh_start)
 
         self.refresher_thread.finished.connect(self.refresh_end)
+        self.itemClicked.connect(self.item_selection_changed)
 
         self.icons_enabled = True
 
@@ -71,16 +73,16 @@ class ModListWidget(QtWidgets.QListWidget):
         """
         Called when the list refresh has started.
         """
-        self.parent().set_button_enabled(False)
-        self.parent().set_button_loading(True)
+        self.parent().parent().set_button_enabled(False)
+        self.parent().parent().set_button_loading(True)
         self.refresh_mods()
 
     def refresh_end(self):
         """
         Called when the list refresh has ended.
         """
-        self.parent().set_button_enabled(True)
-        self.parent().set_button_loading(False)
+        self.parent().parent().set_button_enabled(True)
+        self.parent().parent().set_button_loading(False)
         self.refresh_list()
 
     def refresh_mods(self):
@@ -91,9 +93,26 @@ class ModListWidget(QtWidgets.QListWidget):
 
         if self.icons_enabled:
             for mod in self.mods:
+                if hasattr(mod, "icon_data"):
+                    continue
                 QtCore.QThreadPool.globalInstance().start(IconFetchTask(mod))
 
             QtCore.QThreadPool.globalInstance().waitForDone()
+
+    def item_selection_changed(self):
+        """
+        Called when the item selection changes.
+        """
+        if len(self.selectedItems()) > 0:
+            selected_item = self.selectedItems()[0]
+            self.selected_item = self.itemWidget(selected_item)
+        else:
+            self.selected_item = None
+
+        self.logger.debug(f"Selected item changed to {self.selected_item} ({self.selected_item.mod.name if self.selected_item is not None else None})")
+
+        if self.selected_item is not None:
+            self.parent().parent().open_details()
 
     def apply_filters(self, search: str = None, tags: list = None):
         """
